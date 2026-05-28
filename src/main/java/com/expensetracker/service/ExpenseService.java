@@ -33,5 +33,21 @@ public class ExpenseService {
         return new ArrayList<>(expenseList);
     }
 
+    public String deleteExpense(int id) {
+        if(id <= 0) {
+            return "Id should be greater than 0.";
+        }
+        if(expenseList.isEmpty()) {
+            return "Expense list is empty nothing to be deleted.";
+        }
+        boolean removed = expenseList.removeIf(row -> row.getId() == id);
+
+        if(!removed) {
+            return "Expense does not exist with id " + id;
+        } else {
+            return "Expense with id " + id + " deleted successfully";
+        }
+    }
+
 
 }

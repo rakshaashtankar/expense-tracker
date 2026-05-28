@@ -19,7 +19,8 @@ public class ExpenseTrackerApp {
             System.out.println("\nSelect the operation to perform");
             System.out.println("1. Add Expense");
             System.out.println("2. View Expense");
-            System.out.println("3. Exit");
+            System.out.println("3. Delete Expense");
+            System.out.println("4. Exit");
             System.out.println("Enter your choice");
 
             int choice = sc.nextInt();
@@ -43,8 +44,8 @@ public class ExpenseTrackerApp {
                     System.out.println("Date: " + date);
                     System.out.println("Description: " + description);
                     Expense newExpense = new Expense(amount, Category.valueOf(category.toUpperCase()), date, description);
-                    String message = expenseService.addExpense(newExpense);
-                    System.out.println(message);
+                    String addMessage = expenseService.addExpense(newExpense);
+                    System.out.println(addMessage);
                     break;
                 case 2:
                     List<Expense> expenseList= expenseService.viewExpenses();
@@ -52,12 +53,18 @@ public class ExpenseTrackerApp {
                         System.out.println("No expense added.");
                     }
                     else {
-                        for(Expense expense : expenseList) {
-                            System.out.println(expense);
+                        for(Expense e : expenseList) {
+                            System.out.println(e);
                         }
                     }
                     break;
                 case 3:
+                    System.out.println("Enter the expense id to be deleted");
+                    int deleteId = sc.nextInt();
+                    String deleteMessage = expenseService.deleteExpense(deleteId);
+                    System.out.println(deleteMessage);
+                    break;
+                case 4:
                     System.out.println("Exiting the app.");
                     isExit = true;
                     sc.close();
