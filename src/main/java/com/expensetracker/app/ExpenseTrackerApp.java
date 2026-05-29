@@ -20,7 +20,8 @@ public class ExpenseTrackerApp {
             System.out.println("1. Add Expense");
             System.out.println("2. View Expense");
             System.out.println("3. Delete Expense");
-            System.out.println("4. Exit");
+            System.out.println("4. Update Expense");
+            System.out.println("5. Exit");
             System.out.println("Enter your choice");
 
             int choice = sc.nextInt();
@@ -30,19 +31,25 @@ public class ExpenseTrackerApp {
                     System.out.println("Enter Amount");
                     double amount = sc.nextDouble();
                     sc.nextLine();
-                    System.out.println("Select from Category");
-                    for (Category category: Category.values()) {
-                        System.out.println(category);
+                    boolean isValidCategory = false;
+                    String category = null;
+                    while(!isValidCategory) {
+                        System.out.println("Select from Category");
+                        for (Category c: Category.values()) {
+                            System.out.println(c);
+                        }
+                        category=sc.nextLine();
+                        for (Category c: Category.values()) {
+                            if(c.name().equalsIgnoreCase(category)) {
+                                isValidCategory = true;
+                                break;
+                            }
+                        }
                     }
-                    String category =sc.nextLine();
                     System.out.println("Enter Date(YYYY-MM-DD)");
                     LocalDate date = LocalDate.parse(sc.nextLine());
                     System.out.println("Enter Description");
                     String description = sc.nextLine();
-                    System.out.println("Amount: " + amount);
-                    System.out.println("Category: " + category);
-                    System.out.println("Date: " + date);
-                    System.out.println("Description: " + description);
                     Expense newExpense = new Expense(amount, Category.valueOf(category.toUpperCase()), date, description);
                     String addMessage = expenseService.addExpense(newExpense);
                     System.out.println(addMessage);
@@ -65,6 +72,40 @@ public class ExpenseTrackerApp {
                     System.out.println(deleteMessage);
                     break;
                 case 4:
+                    System.out.println("Enter the expense id to be updated");
+                    int updateId = sc.nextInt();
+                    System.out.println("\nEnter the updatedexpense details");
+                    System.out.println("Enter Amount");
+                    double updatedAmount = sc.nextDouble();
+                    sc.nextLine();
+                    boolean isValidUpdatedCategory = false;
+                    String updatedCategory = null;
+                    while(!isValidUpdatedCategory) {
+                        System.out.println("Select from Category");
+                        for (Category c: Category.values()) {
+                            System.out.println(c);
+                        }
+                        updatedCategory=sc.nextLine();
+                        for (Category c: Category.values()) {
+                            if(c.name().equalsIgnoreCase(updatedCategory)) {
+                                isValidUpdatedCategory = true;
+                                break;
+                            }
+                        }
+                    }
+                    System.out.println("Enter Date(YYYY-MM-DD)");
+                    LocalDate updatedDate = LocalDate.parse(sc.nextLine());
+                    System.out.println("Enter Description");
+                    String updatedDescription = sc.nextLine();
+                    Expense updatedExpense = new Expense(updatedAmount, Category.valueOf(updatedCategory.toUpperCase()), updatedDate, updatedDescription);
+                    boolean isUpdated = expenseService.updateExpense(updateId, updatedExpense);
+                    if(isUpdated) {
+                        System.out.println("Expenses updated successfully");
+                    } else {
+                        System.out.println("Error updating expense");
+                    }
+                    break;
+                case 5:
                     System.out.println("Exiting the app.");
                     isExit = true;
                     sc.close();

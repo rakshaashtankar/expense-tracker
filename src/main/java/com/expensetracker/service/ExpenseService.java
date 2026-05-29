@@ -5,6 +5,7 @@ import com.expensetracker.model.Expense;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 public class ExpenseService {
 
@@ -48,6 +49,33 @@ public class ExpenseService {
             return "Expense with id " + id + " deleted successfully";
         }
     }
+
+    public boolean updateExpense(int id, Expense updatedExpense) {
+        if(updatedExpense.getAmount() <=0) {
+            return false;
+        }
+        if(updatedExpense.getDate().isAfter(LocalDate.now())) {
+            return false;
+        }
+        if(updatedExpense.getDescription() == null || updatedExpense.getDescription().isBlank()) {
+            return false;
+        }
+        Expense expenseSearch = expenseList.stream()
+                .filter(e -> Objects.equals(e.getId(), id))
+                .findFirst()
+                .orElse(null);
+        if(expenseSearch == null) {
+            return false;
+        }
+        expenseSearch.setAmount(updatedExpense.getAmount());
+        expenseSearch.setCategory(updatedExpense.getCategory());
+        expenseSearch.setDate(updatedExpense.getDate());
+        expenseSearch.setDescription(updatedExpense.getDescription());
+        return true;
+    }
+
+
+
 
 
 }
