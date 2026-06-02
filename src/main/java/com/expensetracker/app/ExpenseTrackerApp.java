@@ -20,7 +20,7 @@ public class ExpenseTrackerApp {
 
 
 
-    public Expense readExpenseInput() {
+    private Expense readExpenseInput() {
         System.out.println("\nEnter expense details");
         System.out.println("Enter Amount");
         double amount = sc.nextDouble();
@@ -49,7 +49,7 @@ public class ExpenseTrackerApp {
 
 
 
-    public  String handleAddExpense() {
+    private String handleAddExpense() {
         Expense newExpense = readExpenseInput();
         if( expenseService.addExpense(newExpense)) {
             return "Expense added successfully";
@@ -58,7 +58,7 @@ public class ExpenseTrackerApp {
         }
     }
 
-    public void handleViewExpenses() {
+    private void handleViewExpenses() {
         List<Expense> expenseList= expenseService.viewExpenses();
         if(expenseList.isEmpty()) {
             System.out.println("No expense added.");
@@ -70,7 +70,7 @@ public class ExpenseTrackerApp {
         }
     }
 
-    public void handleDeleteExpense() {
+    private void handleDeleteExpense() {
         System.out.println("Enter the expense id to be deleted");
         int deleteId = sc.nextInt();
         sc.nextLine();
@@ -83,7 +83,7 @@ public class ExpenseTrackerApp {
         }
     }
 
-    public void handleUpdateExpense() {
+    private void handleUpdateExpense() {
         System.out.println("Enter id to update details");
         int updateId = sc.nextInt();
         sc.nextLine();
@@ -96,7 +96,7 @@ public class ExpenseTrackerApp {
         }
     }
 
-    public void start() {
+    private void start() {
         System.out.println("==== Expense Tracker ====");
         boolean isExit = false;
         while(!isExit) {
