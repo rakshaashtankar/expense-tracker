@@ -1,10 +1,12 @@
 package com.expensetracker.service;
 
+import com.expensetracker.model.Category;
 import com.expensetracker.model.Expense;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class ExpenseService {
 
@@ -57,6 +59,25 @@ public class ExpenseService {
         expenseSearch.setDate(updatedExpense.getDate());
         expenseSearch.setDescription(updatedExpense.getDescription());
         return true;
+    }
+
+    public Expense searchExpenseById(int id) {
+        return expenseList.stream()
+                .filter(e -> e.getId() == id)
+                .findFirst()
+                .orElse(null);
+    }
+
+    public List<Expense> searchExpenseByCategory(String category) {
+        return expenseList.stream()
+                .filter(e -> e.getCategory() == Category.valueOf(category.toUpperCase()))
+                .toList();
+    }
+
+    public List<Expense> searchExpenseByDescription(String description) {
+        return expenseList.stream()
+                .filter(e -> e.getDescription().toLowerCase().contains(description.toLowerCase()))
+                .toList();
     }
 
 

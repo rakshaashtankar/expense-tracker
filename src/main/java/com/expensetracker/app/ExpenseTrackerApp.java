@@ -18,13 +18,7 @@ public class ExpenseTrackerApp {
         this.sc  = new Scanner(System.in);
     }
 
-
-
-    private Expense readExpenseInput() {
-        System.out.println("\nEnter expense details");
-        System.out.println("Enter Amount");
-        double amount = sc.nextDouble();
-        sc.nextLine();
+    private String readCategory() {
         boolean isValidCategory = false;
         String category = null;
         while(!isValidCategory) {
@@ -39,7 +33,20 @@ public class ExpenseTrackerApp {
                     break;
                 }
             }
+            if(!isValidCategory) {
+                System.out.println("Invalid Category");
+            }
         }
+        return category;
+    }
+
+
+    private Expense readExpenseInput() {
+        System.out.println("\nEnter expense details");
+        System.out.println("Enter Amount");
+        double amount = sc.nextDouble();
+        sc.nextLine();
+        String category = readCategory();
         System.out.println("Enter Date(YYYY-MM-DD)");
         LocalDate date = LocalDate.parse(sc.nextLine());
         System.out.println("Enter Description");
@@ -96,6 +103,77 @@ public class ExpenseTrackerApp {
         }
     }
 
+    private void handleSearchById() {
+        System.out.println("Enter id to be searched");
+        int searchId = sc.nextInt();
+        sc.nextLine();
+        Expense searchedExpenseById = expenseService.searchExpenseById(searchId);
+        if(searchedExpenseById == null) {
+            System.out.println("No expense with id " + searchId + " is present.");
+        } else {
+            System.out.println(searchedExpenseById);
+        }
+
+    }
+
+    private void handleSearchByCategory() {
+        String searchCategory = readCategory();
+        List<Expense> searchedCategoryList = expenseService.searchExpenseByCategory(searchCategory);
+        if(searchedCategoryList.isEmpty()) {
+            System.out.println("No expense added under " + searchCategory.toUpperCase() + " category.");
+        } else {
+            for(Expense e : searchedCategoryList) {
+                System.out.println(e);
+            }
+        }
+    }
+
+    private void handleSearchByDescription() {
+        System.out.println("Enter description to be searched");
+        String searchDescription = sc.nextLine();
+        List<Expense> searchedDescriptionList = expenseService.searchExpenseByDescription(searchDescription);
+        if(searchedDescriptionList.isEmpty()) {
+            System.out.println("No expense with " + searchDescription + " description is added.");
+        } else {
+            for(Expense e : searchedDescriptionList) {
+                System.out.println(e);
+            }
+        }
+    }
+
+    private void handleSearchExpense() {
+        boolean isBack  = false;
+        while(!isBack) {
+            System.out.println("\n=== Select Search Operation ===");
+            System.out.println("1. Search By ID");
+            System.out.println("2. Search By Category");
+            System.out.println("3. Search By Description");
+            System.out.println("4. Back");
+            System.out.println("Enter your search choice");
+            int searchType = sc.nextInt();
+            sc.nextLine();
+            switch (searchType) {
+                case 1:
+                    handleSearchById();
+                    break;
+                case 2:
+                    handleSearchByCategory();
+                    break;
+                case 3:
+                    handleSearchByDescription();
+                    break;
+                case 4:
+                    System.out.println("Exiting Search...");
+                    isBack = true;
+                    break;
+                default:
+                    System.out.println("Invalid search choice");
+            }
+        }
+
+
+    }
+
     private void start() {
         System.out.println("==== Expense Tracker ====");
         boolean isExit = false;
@@ -105,7 +183,8 @@ public class ExpenseTrackerApp {
             System.out.println("2. View Expense");
             System.out.println("3. Delete Expense");
             System.out.println("4. Update Expense");
-            System.out.println("5. Exit");
+            System.out.println("5. Search Expense");
+            System.out.println("6. Exit");
             System.out.println("Enter your choice");
 
             int choice = sc.nextInt();
@@ -124,6 +203,9 @@ public class ExpenseTrackerApp {
                     handleUpdateExpense();
                     break;
                 case 5:
+                    handleSearchExpense();
+                    break;
+                case 6:
                     System.out.println("Exiting the app.");
                     isExit = true;
                     sc.close();
