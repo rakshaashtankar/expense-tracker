@@ -3,22 +3,24 @@ package com.expensetracker.app;
 import com.expensetracker.exception.ExpenseNotFoundException;
 import com.expensetracker.model.Category;
 import com.expensetracker.model.Expense;
+import com.expensetracker.repository.ExpenseRepository;
 import com.expensetracker.service.ExpenseService;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
 import java.util.InputMismatchException;
 import java.util.List;
-import java.util.Optional;
 import java.util.Scanner;
 
 public class ExpenseTrackerApp {
+
     private final ExpenseService expenseService;
     private final Scanner sc;
 
 
     public ExpenseTrackerApp() {
-        this.expenseService = new ExpenseService();
+        ExpenseRepository repository = new ExpenseRepository();
+        this.expenseService = new ExpenseService(repository);
         this.sc  = new Scanner(System.in);
     }
 
@@ -40,26 +42,19 @@ public class ExpenseTrackerApp {
         }
     }
 
-    private String readCategory() {
-        boolean isValidCategory = false;
-        String category = null;
-        while(!isValidCategory) {
+    private Category readCategory() {
+        while(true) {
             System.out.println("Select from Category");
-            for (Category c: Category.values()) {
-                System.out.println(c);
+            for (Category category: Category.values()) {
+                System.out.println(category);
             }
-            category=sc.nextLine();
-            for (Category c: Category.values()) {
-                if(c.name().equalsIgnoreCase(category)) {
-                    isValidCategory = true;
-                    break;
-                }
-            }
-            if(!isValidCategory) {
-                System.out.println("Invalid Category");
+            String category=sc.nextLine();
+            try{
+                return Category.from(category);
+            } catch (IllegalArgumentException ex) {
+                System.out.println(ex.getMessage());
             }
         }
-        return category;
     }
 
     private LocalDate readDate(){
@@ -78,7 +73,7 @@ public class ExpenseTrackerApp {
         }
     }
 
-    public String readDescription() {
+    private String readDescription() {
         while(true) {
             System.out.println("Enter Description");
             String description = sc.nextLine();
@@ -94,10 +89,10 @@ public class ExpenseTrackerApp {
     private Expense readExpenseInput() {
         System.out.println("\nEnter expense details");
         double amount = readAmount();
-        String category = readCategory();
+        Category category = readCategory();
         LocalDate date = readDate();
         String description = readDescription();
-        return new Expense(amount, Category.valueOf(category.toUpperCase()), date, description);
+        return new Expense(amount, category, date, description);
     }
 
     private int readInteger() {
@@ -113,6 +108,12 @@ public class ExpenseTrackerApp {
         }
     }
 
+    private void displayExpenses(List<Expense> expenseList) {
+        for(Expense e : expenseList) {
+            System.out.println(e);
+        }
+    }
+
     private void handleAddExpense() {
         try {
             Expense newExpense = readExpenseInput();
@@ -125,12 +126,10 @@ public class ExpenseTrackerApp {
 
     private void handleViewExpenses() {
         List<Expense> expenseList= expenseService.viewExpenses();
-        if(expenseList.isEmpty()) {
-            System.out.println("No expense added till now.");
+        if(!expenseList.isEmpty()) {
+            displayExpenses(expenseList);
         } else {
-            for(Expense e : expenseList) {
-                System.out.println(e);
-            }
+            System.out.println("No expense added.");
         }
     }
 
@@ -151,7 +150,7 @@ public class ExpenseTrackerApp {
             int updateId = readInteger();
             Expense updatedExpense = readExpenseInput();
             expenseService.updateExpense(updateId, updatedExpense);
-            System.out.println("Expenses updated successfully");
+            System.out.println("Expense updated successfully");
         } catch( IllegalArgumentException | ExpenseNotFoundException ex) {
             System.out.println(ex.getMessage());
         }
@@ -161,42 +160,33 @@ public class ExpenseTrackerApp {
         try {
             System.out.println("Enter id to be searched");
             int searchId = readInteger();
-            Optional<Expense> searchedExpense = expenseService.searchExpenseById(searchId);
-            if(searchedExpense.isPresent()) {
-                searchedExpense.ifPresent(System.out::println);
-            } else {
-                System.out.println("No expense present with id "+searchId+ ".");
-            }
-        } catch( IllegalArgumentException ex) {
+            Expense searchedExpense = expenseService.searchExpenseById(searchId);
+            System.out.println(searchedExpense);
+        } catch( IllegalArgumentException | ExpenseNotFoundException ex) {
             System.out.println(ex.getMessage());
         }
     }
 
     private void handleSearchByCategory() {
-        String searchCategory = readCategory();
+        Category searchCategory = readCategory();
         List<Expense> searchedCategoryList = expenseService.searchExpenseByCategory(searchCategory);
-        if(searchedCategoryList.isEmpty()) {
-            System.out.println("No expenses exist with " + searchCategory.toUpperCase() + " category.");
+        if(!searchedCategoryList.isEmpty()) {
+            displayExpenses(searchedCategoryList);
         } else {
-            for(Expense e : searchedCategoryList) {
-                System.out.println(e);
-            }
+            System.out.println("No expense added under " + searchCategory + " category.");
         }
-
     }
 
     private void handleSearchByDescription() {
         System.out.println("Enter description to be searched");
         String searchDescription = sc.nextLine();
         List<Expense> searchedDescriptionList = expenseService.searchExpenseByDescription(searchDescription);
-        if(searchedDescriptionList.isEmpty()) {
-            System.out.println("No expenses exist with " + searchDescription + " description.");
-        } else {
-            for(Expense e : searchedDescriptionList) {
-                System.out.println(e);
-            }
-        }
 
+        if(!searchedDescriptionList.isEmpty()) {
+            displayExpenses(searchedDescriptionList);
+        } else {
+            System.out.println("No expense with " + searchDescription + " description.");
+        }
     }
 
     private void handleSearchExpense() {

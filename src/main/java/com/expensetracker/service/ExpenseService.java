@@ -3,95 +3,112 @@ package com.expensetracker.service;
 import com.expensetracker.exception.ExpenseNotFoundException;
 import com.expensetracker.model.Category;
 import com.expensetracker.model.Expense;
+import com.expensetracker.repository.ExpenseRepository;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 public class ExpenseService {
 
-    private final List<Expense> expenseList = new ArrayList<>();
+    private final ExpenseRepository repository;
 
-    private static int count = 1;
+    public ExpenseService(ExpenseRepository repository) {
+        this.repository = repository;
+    }
 
 
-    private void validateExpense(Expense expense) {
+
+    private void validateExpenseNotNull(Expense expense) {
         if(expense == null) {
             throw new IllegalArgumentException("Expense must not be null.");
-        };
-        if(expense.getAmount() <= 0) {
+        }
+    }
+
+    private void validateId(int id){
+        if(id <= 0) {
+            throw new IllegalArgumentException("Expense id should be greater than 0.");
+        }
+    }
+
+    private void validateAmount(double amount) {
+        if(amount <= 0) {
             throw new IllegalArgumentException("Expense amount must be greater than 0.");
-        };
-        if(expense.getDate() ==null) {
+        }
+    }
+
+    private void validateDate(LocalDate date) {
+        if(date ==null) {
             throw new IllegalArgumentException("Expense date must not be null.");
         }
-        if(expense.getDate().isAfter(LocalDate.now())) {
+        if(date.isAfter(LocalDate.now())) {
             throw new IllegalArgumentException("Expense date cannot be future dated.");
         }
-        if(expense.getDescription() == null || expense.getDescription().isBlank()) {
+    }
+
+    private void validateDescription(String description) {
+        if(description == null || description.isBlank()) {
             throw new IllegalArgumentException("Expense description cannot be null or blank.");
         }
-        if(expense.getCategory() == null)  {
+    }
+
+    //Defensive validation
+    private void validateCategory(Category category){
+        if(category == null)  {
             throw new IllegalArgumentException("Expense category cannot be null.");
         }
+    }
+
+    private void validExpense(Expense expense) {
+        validateExpenseNotNull(expense);
+        validateCategory(expense.getCategory());
+        validateAmount(expense.getAmount());
+        validateDate(expense.getDate());
+        validateDescription(expense.getDescription());
 
     }
 
     public void addExpense(Expense newExpense){
-        validateExpense(newExpense);
-        Expense addExpense = new Expense(count++, newExpense.getAmount(), newExpense.getCategory(), newExpense.getDate(), newExpense.getDescription());
-        expenseList.add(addExpense);
+        validExpense(newExpense);
+        repository.save(newExpense);
     }
 
     public List<Expense> viewExpenses() {
-        return new ArrayList<>(expenseList);
+        return repository.findAll();
+
     }
 
     public void deleteExpense(int id) {
-        if(id <= 0) {
-            throw new IllegalArgumentException("Expense Id should be greater than 0.");
-        }
-        boolean isRemoved = expenseList.removeIf(row -> row.getId() == id);
+        validateId(id);
+        boolean isRemoved = repository.deleteById(id);
         if(!isRemoved) {
             throw new ExpenseNotFoundException("Expense does not exist with id " + id + ".");
         }
     }
 
     public void updateExpense(int id, Expense updatedExpense) {
-        if(id <= 0) {
-            throw new IllegalArgumentException("Expense id should be greater than 0.");
-        }
-        validateExpense(updatedExpense);
-        Expense expenseSearch = expenseList.stream()
-                .filter(e -> e.getId() == id)
-                .findFirst()
-                .orElseThrow(() -> new ExpenseNotFoundException("Expense not found with id " + id));
-        expenseSearch.setAmount(updatedExpense.getAmount());
-        expenseSearch.setCategory(updatedExpense.getCategory());
-        expenseSearch.setDate(updatedExpense.getDate());
-        expenseSearch.setDescription(updatedExpense.getDescription());
+        validateId(id);
+        validExpense(updatedExpense);
+        Expense expense = repository.findById(id).orElseThrow(() -> new ExpenseNotFoundException("Expense does not exist with id " + id + "."));
+        expense.setAmount(updatedExpense.getAmount());
+        expense.setCategory(updatedExpense.getCategory());
+        expense.setDate(updatedExpense.getDate());
+        expense.setDescription(updatedExpense.getDescription());
     }
 
-    public Optional<Expense> searchExpenseById(int id) {
-        if(id <= 0) {
-            throw new IllegalArgumentException("Expense id should be greater than 0.");
-        }
-        return expenseList.stream()
-                .filter(e -> e.getId() == id)
-                .findFirst();
+    public Expense searchExpenseById(int id) {
+        validateId(id);
+        return repository.findById(id)
+                .orElseThrow(() -> new ExpenseNotFoundException("Expense does not exist with id " + id + "."));
     }
 
-    public List<Expense> searchExpenseByCategory(String category) {
-        return  expenseList.stream()
-                .filter(e -> e.getCategory() == Category.valueOf(category.toUpperCase()))
-                .toList();
+    public List<Expense> searchExpenseByCategory(Category category) {
+        validateCategory(category);
+        return repository.findByCategory(category);
     }
 
     public List<Expense> searchExpenseByDescription(String description) {
-        return expenseList.stream()
-                .filter(e -> e.getDescription().toLowerCase().contains(description.toLowerCase()))
-                .toList();
+        validateDescription(description);
+        return repository.findByDescription(description);
     }
 
 
