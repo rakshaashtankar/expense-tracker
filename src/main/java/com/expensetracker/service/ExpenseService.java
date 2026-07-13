@@ -118,11 +118,7 @@ public class ExpenseService {
         Map<Category, Double> categorySummary = new LinkedHashMap<>();
         for(Expense expense: allExpenses) {
             Category category = expense.getCategory();
-            if(categorySummary.containsKey(category)) {
-                categorySummary.put(category, categorySummary.get(category) + expense.getAmount());
-            } else {
-                categorySummary.put(category, expense.getAmount());
-            }
+            categorySummary.put(category, categorySummary.getOrDefault(category, 0.0) + expense.getAmount());
         }
         return categorySummary;
     }

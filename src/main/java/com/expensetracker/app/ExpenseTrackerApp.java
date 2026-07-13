@@ -221,8 +221,8 @@ public class ExpenseTrackerApp {
     }
 
     private void handleSummary() {
-        System.out.println("\n=== Summary ===");
-        System.out.println("Category    Total");
+        System.out.println("\n======== Summary ========");
+        System.out.printf("%-15s %s%n","Category", "Total");
         Map<Category, Double> categorySummary = expenseService.getCategorySummary();
         if(categorySummary.isEmpty()) {
             System.out.println("No expense available.");
@@ -230,10 +230,10 @@ public class ExpenseTrackerApp {
         }
         double totalAmount = expenseService.calculateExpensesTotalAmount();
         for(Map.Entry<Category, Double> entry : categorySummary.entrySet()) {
-            System.out.println(entry.getKey() +  "  "  + entry.getValue());
+            System.out.printf("%-15s %.2f%n",entry.getKey(), entry.getValue());
         }
         System.out.println("--------------------------");
-        System.out.println("Total     " + totalAmount);
+        System.out.printf("%-15s %.2f%n","Total",totalAmount);
     }
 
 
