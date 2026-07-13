@@ -20,7 +20,7 @@ public enum Category {
                 return category;
             }
         }
-        throw  new IllegalArgumentException("Invalid category. Please choose one of: FOOD, TRAVEL, SHOPPING, BILLS, ENTERTAINMENT, HEALTH, EDUCATION, OTHER.");
+        throw new IllegalArgumentException("Invalid category. Please choose one of: FOOD, TRAVEL, SHOPPING, BILLS, ENTERTAINMENT, HEALTH, EDUCATION, OTHER.");
     }
 
 }

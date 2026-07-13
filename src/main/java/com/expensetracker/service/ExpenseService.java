@@ -6,7 +6,9 @@ import com.expensetracker.model.Expense;
 import com.expensetracker.repository.ExpenseRepository;
 
 import java.time.LocalDate;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 public class ExpenseService {
 
@@ -111,6 +113,28 @@ public class ExpenseService {
         return repository.findByDescription(description);
     }
 
+    public Map<Category, Double> getCategorySummary() {
+        List<Expense> allExpenses = viewExpenses();
+        Map<Category, Double> categorySummary = new LinkedHashMap<>();
+        for(Expense expense: allExpenses) {
+            Category category = expense.getCategory();
+            if(categorySummary.containsKey(category)) {
+                categorySummary.put(category, categorySummary.get(category) + expense.getAmount());
+            } else {
+                categorySummary.put(category, expense.getAmount());
+            }
+        }
+        return categorySummary;
+    }
+
+    public double calculateExpensesTotalAmount() {
+        List<Expense> allExpenses = viewExpenses();
+        double totalAmount  = 0;
+        for(Expense expense : allExpenses) {
+            totalAmount += expense.getAmount();
+        }
+        return totalAmount;
+    }
 
 
 }

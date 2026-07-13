@@ -10,6 +10,7 @@ import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
 import java.util.InputMismatchException;
 import java.util.List;
+import java.util.Map;
 import java.util.Scanner;
 
 public class ExpenseTrackerApp {
@@ -217,9 +218,24 @@ public class ExpenseTrackerApp {
                     System.out.println("Invalid search choice");
             }
         }
-
-
     }
+
+    private void handleSummary() {
+        System.out.println("\n=== Summary ===");
+        System.out.println("Category    Total");
+        Map<Category, Double> categorySummary = expenseService.getCategorySummary();
+        if(categorySummary.isEmpty()) {
+            System.out.println("No expense available.");
+            return;
+        }
+        double totalAmount = expenseService.calculateExpensesTotalAmount();
+        for(Map.Entry<Category, Double> entry : categorySummary.entrySet()) {
+            System.out.println(entry.getKey() +  "  "  + entry.getValue());
+        }
+        System.out.println("--------------------------");
+        System.out.println("Total     " + totalAmount);
+    }
+
 
     private void start() {
 
@@ -232,7 +248,8 @@ public class ExpenseTrackerApp {
                 System.out.println("3. Delete Expense");
                 System.out.println("4. Update Expense");
                 System.out.println("5. Search Expense");
-                System.out.println("6. Exit");
+                System.out.println("6. Summary");
+                System.out.println("7. Exit");
                 System.out.println("Enter your choice");
 
                 int choice = readInteger();
@@ -253,6 +270,9 @@ public class ExpenseTrackerApp {
                         handleSearchExpense();
                         break;
                     case 6:
+                        handleSummary();
+                        break;
+                    case 7:
                         System.out.println("Exiting the app.");
                         isExit = true;
                         sc.close();
